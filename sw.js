@@ -1,6 +1,6 @@
-// Service worker: ให้ app.html เปิดได้แม้ไม่มีอินเทอร์เน็ต (วางไฟล์นี้ไว้โฟลเดอร์เดียวกับ app.html)
-const V = 'pos-v2';
-const SHELL = ['app.html', 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js'];
+// Service worker: ให้แอปเปิดได้แม้ไม่มีอินเทอร์เน็ต (วางไฟล์นี้ไว้โฟลเดอร์เดียวกับ index.html)
+const V = 'pos-v3';
+const SHELL = ['./', 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js'];
 self.addEventListener('install', e => e.waitUntil(caches.open(V).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())));
 self.addEventListener('activate', e => e.waitUntil(
   caches.keys().then(ks => Promise.all(ks.filter(k => k !== V).map(k => caches.delete(k)))).then(() => self.clients.claim())));
@@ -9,9 +9,9 @@ self.addEventListener('fetch', e => {
   const u = new URL(r.url);
   if (u.hostname.endsWith('.supabase.co') && !u.pathname.startsWith('/storage/')) return;   // ข้อมูล/API: ใช้เครือข่ายเสมอ
   if (r.mode === 'navigate') {
-    if (!/(app\.html|\/)$/.test(u.pathname)) return;
-    e.respondWith(fetch(r).then(res => { const cp = res.clone(); caches.open(V).then(c => c.put('app.html', cp)); return res; })
-      .catch(() => caches.match('app.html')));
+    if (!/(index\.html|app\.html|\/)$/.test(u.pathname)) return;
+    e.respondWith(fetch(r).then(res => { const cp = res.clone(); caches.open(V).then(c => c.put('./', cp)); return res; })
+      .catch(() => caches.match('./')));
     return;
   }
   if (r.destination === 'image' || u.pathname.includes('/storage/')) {       // รูปสินค้า: แสดงของเก่าก่อนแล้วอัปเดตเงียบๆ
