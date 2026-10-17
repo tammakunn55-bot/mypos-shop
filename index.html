@@ -1042,11 +1042,14 @@ $('#nav').onclick = e => { const b = e.target.closest('[data-tab]'); if (b) go(b
 document.querySelectorAll('[data-signout]').forEach(b => b.onclick = async () => { await ctx.sb.auth.signOut(); localStorage.removeItem('app_status'); location.reload(); });
 
 // ---- หน้าจอเริ่มต้น ----
+const keyRole = k => { try { const b = (k.split('.')[1] || '').replace(/-/g, '+').replace(/_/g, '/'); return JSON.parse(atob(b + '='.repeat((4 - b.length % 4) % 4))).role; } catch (_) { return ''; } };
 $('#ssave').onclick = () => {
-  const u = normUrl($('#su').value), k = $('#sk').value.trim();
-  if (!/^https:\/\/[^\s]+\.[^\s]+$/.test(u) || k.length < 20) return $('#se').textContent = 'ตรวจ Project URL และ anon key อีกครั้ง';
-  if (/service_role/.test(atob((k.split('.')[1] || '').replace(/-/g, '+').replace(/_/g, '/') + '==') || '')) return $('#se').textContent = 'นี่คือ service_role key ห้ามใช้ ให้ใช้ anon public key';
-  localStorage.setItem('cfg_url', u); localStorage.setItem('cfg_key', k); boot();
+  const u = normUrl($('#su').value), k = $('#sk').value.replace(/\s+/g, '');
+  if (!/^https:\/\/[^\s\/]+\.[^\s\/]+$/.test(u) || k.length < 20) return $('#se').textContent = 'ตรวจ Project URL และ anon key อีกครั้ง';
+  if (keyRole(k) === 'service_role') return $('#se').textContent = 'นี่คือ service_role key ห้ามใช้ ให้ใช้ anon public key';
+  $('#se').textContent = '';
+  localStorage.setItem('cfg_url', u); localStorage.setItem('cfg_key', k);
+  boot().catch(e => { screen('#sh-setup'); $('#se').textContent = 'เชื่อมต่อไม่สำเร็จ: ' + (e.message || e); });
 };
 $('#icopy').onclick = async () => { try { await navigator.clipboard.writeText(INSTALL_SQL); $('#ie').textContent = ''; $('#icopy').textContent = 'คัดลอกแล้ว ✓'; } catch (_) { $('#sqltxt').select(); $('#ie').textContent = 'คัดลอกอัตโนมัติไม่ได้ — เลือกข้อความในกล่องด้านล่างแล้วคัดลอกเอง'; } };
 $('#irecheck').onclick = boot; $('#ireset').onclick = resetConn; $('#lreset').onclick = resetConn;
