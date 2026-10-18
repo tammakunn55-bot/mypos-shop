@@ -1,5 +1,5 @@
 // Service worker: ให้แอปเปิดได้แม้ไม่มีอินเทอร์เน็ต (วางไฟล์นี้ไว้โฟลเดอร์เดียวกับ index.html)
-const V = 'pos-v4';
+const V = 'pos-v5';
 const SHELL = ['./', 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js'];
 self.addEventListener('install', e => e.waitUntil(caches.open(V).then(c => Promise.all(SHELL.map(u => c.add(u).catch(() => {})))).then(() => self.skipWaiting())));   // โหลดไม่ได้บางไฟล์ก็ยังติดตั้งได้
 self.addEventListener('activate', e => e.waitUntil(
